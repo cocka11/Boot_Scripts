@@ -60,3 +60,50 @@ new_dirs=()
             done
         done
 done
+
+for DIR_BASE in $(ls /apex); do
+    for NAME in /apex/$DIR_BASE/priv-app /apex/$DIR_BASE/app /apex/$DIR_BASE/javalib; do
+        for ALL_DIR in "$NAME"/* ; do
+            DIR_APP=$(dirname "$ALL_DIR")
+            DIR_NAME=$(basename "$ALL_DIR")
+            DIR2=$(basename $NAME)
+            CUT=${DIR_NAME%%@*}
+            compiler="speed-profile"
+            mount -o rw,remount /apex/$DIR_BASE 2>/dev/null
+            for ARCH in $(ls /data/dalvik-cache); do
+                variant=`getprop dalvik.vm.isa.$ARCH.variant`
+                if [[ $NAME == "/apex/$DIR_BASE/priv-app" || $NAME == "/apex/$DIR_BASE/app" ]]; then
+                    if [ -f $DIR_APP/$DIR_NAME/$CUT.apk ]; then
+                        if [ ! -d "$DIR_APP/$DIR_NAME/oat/$ARCH" ] && [ -f "/data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@$CUT.apk@classes.dex" ]; then
+                           mkdir -p $DIR_APP/$DIR_NAME/oat/$ARCH                         
+                           dex2oat \
+                           --dex-file="$DIR_APP/$DIR_NAME/$CUT.apk" \
+                           --compiler-filter=$compiler \
+                           --instruction-set=$ARCH \
+                           --instruction-set-variant=$variant \
+                           --instruction-set-features=default \
+                           --oat-file="$DIR_APP/$DIR_NAME/oat/$ARCH/$CUT.odex"
+                           change_permissions $DIR_NAME
+                           echo "Compiling $CUT.apk to odex..."
+                       fi
+                    fi          
+                elif [[ $NAME == "/apex/$DIR_BASE/javalib" ]]; then
+                      if [ -f $NAME/$DIR_NAME ]; then
+                          if [ ! -d "DIR_APP/oat/$ARCH" ] && [ -f "/data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@classes.dex" ]; then
+                            mkdir -p $DIR_APP/oat/$ARCH
+                            dex2oat \
+                            --dex-file="$DIR_APP/$DIR_NAME" \
+                            --compiler-filter=$compiler \
+                            --instruction-set=$ARCH \
+                            --instruction-set-variant=$variant \
+                            --instruction-set-features=default \
+                            --oat-file="$DIR_APP/oat/$ARCH/${DIR_NAME%.jar}.odex"
+                            change_permissions $DIR_APP
+                            echo "Compiling $DIR_NAME to odex..."
+                          fi
+                      fi
+                fi                 
+           done
+        done
+   done
+done
