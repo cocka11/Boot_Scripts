@@ -2,12 +2,24 @@
 
 dirs=("/system/app" "/system/priv-app" "/system/product/app" "/system/product/priv-app" "/system/system_ext/app" "/system/system_ext/priv-app" "/vendor/app")
 
-     mount -o rw,remount /
-     mount -o rw,remount /vendor
+mount -o rw,remount /
+mount -o rw,remount /vendor
+
+arch_types=($(ls /data/dalvik-cache))
+
+for TYPE_ARCH in "${arch_types[@]}"; do
+    case $TYPE_ARCH in
+      arm | arm64 | x86 | x86_64)
+        ;;
+        *)
+        echo "Tip i panjohur i arkitekturës: $TYPE_ARCH. Kaloj tek arkitektura tjetër."
+        continue
+        ;;
+    esac
 
 for dir in "${dirs[@]}"; do
     
-    find "$dir" -name "*.apk" -print0 | while IFS= read -r -d ''  apk; do
+    find "$dir" -name "*.apk" -print0 | while IFS= read -r -d '' apk; do
          DIR=$(dirname "$apk")
          APK=$(basename "$apk")
     
@@ -26,25 +38,26 @@ new_dirs=()
                if [[ "${DEX_DIR: -1}" == "@" ]]; then
                      DEX_DIR="${DEX_DIR%?}"
                fi
-    
-                   for TYPE_ARCH in $(ls /data/dalvik-cache); do
      
                        if [ -f "/data/dalvik-cache/$TYPE_ARCH/$DEX_DIR@${APK%.apk}@$APK@classes.dex" ]; then
                        
                          oat_dir="$DIR/oat/$TYPE_ARCH"
-                         apk_file="$DIR/$APK"      
+                         apk_file="$DIR/$APK"
                          oat_file="$oat_dir/${APK%.apk}.odex"
                          mkdir -p "$oat_dir" 2>/dev/null
                          compiler="speed-profile"
                          variant=`getprop dalvik.vm.isa.$TYPE_ARCH.variant`
-                         echo "Compiling $APK to odex..."
-                         dex2oat \
-                         --dex-file="$apk_file" \
-                         --compiler-filter=$compiler \
-                         --instruction-set=$TYPE_ARCH \
-                         --instruction-set-variant=$variant \
-                         --instruction-set-features=default \
-                         --oat-file="$oat_file"
+                          if dex2oat \
+                            --dex-file="$apk_file" \
+                            --compiler-filter=$compiler \
+                            --instruction-set=$TYPE_ARCH \
+                            --instruction-set-variant=$variant \
+                            --instruction-set-features=default \
+                            --oat-file="$oat_file"; then
+                            echo  "Sukses: $APK u kompilua në odex."
+                          else
+                            echo  "Gabim në kompilimin e $APK në odex."
+                          fi
                          chmod -R a=r,a+X,u+w $oat_dir
                          rm -f /data/dalvik-cache/$TYPE_ARCH/$DEX_DIR@${APK%.apk}@$APK@classes.*
                       fi
@@ -67,36 +80,43 @@ for DIR_BASE in $(ls /apex); do
                 if [[ $NAME == "/apex/$DIR_BASE/priv-app" || $NAME == "/apex/$DIR_BASE/app" ]]; then
                     if [ -f $DIR_APP/$DIR_NAME/$CUT.apk ]; then
                         if [ -f "/data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@$CUT.apk@classes.dex" ]; then
-                           mkdir -p $DIR_APP/$DIR_NAME/oat/$ARCH                         
-                           dex2oat \
+                           mkdir -p $DIR_APP/$DIR_NAME/oat/$ARCH
+                           
+                          if dex2oat \
                            --dex-file="$DIR_APP/$DIR_NAME/$CUT.apk" \
                            --compiler-filter=$compiler \
                            --instruction-set=$ARCH \
                            --instruction-set-variant=$variant \
                            --instruction-set-features=default \
-                           --oat-file="$DIR_APP/$DIR_NAME/oat/$ARCH/$CUT.odex"
-                           echo "Compiling $CUT.apk to odex..."
+                           --oat-file="$DIR_APP/$DIR_NAME/oat/$ARCH/$CUT.odex"; then
+                           echo  "Sukses: $DIR_NAME u kompilua në odex."
+                          else
+                            echo  "Gabim në kompilimin e $DIR_NAME në odex."
+                          fi
                            chmod -R a=r,a+X,u+w $DIR_APP
                            rm -rf /data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@$CUT.apk@classes.*
                        fi
-                    fi          
+                    fi
                 elif [[ $NAME == "/apex/$DIR_BASE/javalib" ]]; then
                       if [ -f $NAME/$DIR_NAME ]; then
                           if [ -f "/data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@classes.dex" ]; then
                             mkdir -p $DIR_APP/oat/$ARCH
-                            dex2oat \
+                           if  dex2oat \
                             --dex-file="$DIR_APP/$DIR_NAME" \
                             --compiler-filter=$compiler \
                             --instruction-set=$ARCH \
                             --instruction-set-variant=$variant \
                             --instruction-set-features=default \
-                            --oat-file="$DIR_APP/oat/$ARCH/${DIR_NAME%.jar}.odex"
-                            echo "Compiling $DIR_NAME to odex..."
+                            --oat-file="$DIR_APP/oat/$ARCH/${DIR_NAME%.jar}.odex"; then
+                            echo  "Sukses: $DIR_NAME u kompilua në odex."
+                          else
+                            echo  "Gabim në kompilimin e $DIR_NAME në odex."
+                          fi
                             chmod -R a=r,a+X,u+w $DIR_APP
                             rm -rf /data/dalvik-cache/$ARCH/apex@$DIR_BASE@$DIR2@$DIR_NAME@classes.*
                          fi
                      fi
-                fi                 
+                fi
            done
        done
    done
