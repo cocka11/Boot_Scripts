@@ -5,7 +5,7 @@ echo -n boot_script.sh > /sys/power/wake_lock
 # Pjesa e konfigurueshme
 log_dir="/data/Arbri"
 execution_interval_minutes=180
-max_attempts=2
+max_attempts=1
 
 # Kontrolloni dhe krijoni folderin e log nëse nuk ekziston
 if [ ! -d "$log_dir" ]; then
@@ -24,6 +24,9 @@ execution_flag="$log_dir/execution_flag"
 [ -f "$error_log_file" ] || touch "$error_file.log"
 [ -f "$execution_time_log_file" ] || touch "$execution_time_file.log"
 
+# mounted system
+mount -o rw,remount /
+
 # Pastroi flag-in e ekzekutimit në fillim
 echo "0" > "$execution_flag"
 
@@ -33,6 +36,13 @@ if [ ! -d "$initd_dir" ]; then
   mkdir -p "$initd_dir"
   chmod 755 "$initd_dir"
 fi
+
+# Ndryshoni lejet e skriptave në direktorinë init.d
+for script_perm in "$initd_dir"/*; do
+    if [ -f "$script_perm" ]; then
+       chmod 755 "$script_perm"
+    fi
+done
 
 while true; do
     current_hour=$(date +"%H")
@@ -58,26 +68,31 @@ while true; do
     data_time=$(date +"%H:%M:%S %d-%m-%Y")
     echo "$data_time: Executing scripts." >> "$success_log_file"
 
-    # Pjesa e ekzekutimit të skripteve me kufizim të tentimeve
-    find "$initd_dir" -type f -executable | while read script; do
-        script_log="$log_dir/$(basename "${script%.*}").log"
-        data_time=$(date +"%H:%M:%S %d-%m-%Y")
-        echo "Starting $script at $data_time" >> "$execution_time_log_file"
-
-        attempt=1
-        while [ "$attempt" -le "$max_attempts" ]; do
-            if timeout 120 sh "$script" >"$script_log" 2>&1; then
-                echo "Successfully executed $script" >> "$success_log_file"
-                echo "=====================================" >> "$success_log_file"
-                break
-            else
-                echo "Attempt $attempt: Execution failed or timed out for $script" >> "$error_log_file"
-                echo "=====================================" >> "$error_log_file"
-                attempt=$((attempt + 1))
-            fi
-        done
-        end_time=$(date +"%H:%M:%S %d-%m-%Y")
+find "$initd_dir" -type f -executable | while read script; do
+    script_name=$(basename "${script%.*}")
+    script_log="$log_dir/$script_name.log"
+    data_time=$(date +"%H:%M:%S %d-%m-%Y")
+    
+    echo "Starting $script_name at $data_time" >> "$execution_time_log_file"
+    
+    attempt=1
+    while [ "$attempt" -le "$max_attempts" ]; do
+        if timeout 120 sh "$script" >"$script_log" 2>&1; then
+            echo "Successfully executed $script_name" >> "$success_log_file"
+            echo "=====================================" >> "$success_log_file"
+            break
+        else
+            echo "Attempt $attempt: Execution failed or timed out for $script_name" >> "$error_log_file"
+            echo "=====================================" >> "$error_log_file"
+            attempt=$((attempt + 1))
+        fi
     done
+    end_time=$(date +"%H:%M:%S %d-%m-%Y")
+
+    # Log detajet e ekzekutimit të skriptit
+    echo "End time: $end_time" >> "$execution_time_log_file"
+    echo "=====================================" >> "$execution_time_log_file"
+done
     
     # Kontrollo për ndërprerjen e skriptit
     if [ -f "$stop" ]; then
