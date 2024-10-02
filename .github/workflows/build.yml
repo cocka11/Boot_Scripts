@@ -6,7 +6,21 @@ on:
       - main
   release:
     types: [created]
-  workflow_dispatch:  # Kjo linjë shton mbështetjen për nisje manuale
+  workflow_dispatch:
+    inputs:
+      upload_release:
+        description: 'A dëshironi të ngarkoni zip-in në një release të re?'
+        required: true
+        default: 'no'
+        type: choice
+        options:
+          - yes
+          - no
+      version:
+        description: 'Versioni i ri i modulës'
+        required: false
+        default: '1.0.0'
+        type: string
 
 jobs:
   build:
@@ -38,10 +52,18 @@ jobs:
           name: Odex_app
           path: Odex_app.zip
 
-      - name: Create Release and Upload Zip (Opsionale)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Determine if should upload to release
+        id: should_upload
+        run: |
+          echo "UPLOAD_RELEASE=${{ github.event.inputs.upload_release || 'no' }}" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_ENV
+
+      - name: Create Release and Upload Zip
+        if: env.UPLOAD_RELEASE == 'yes' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ env.VERSION || github.ref }}
+          release_name: Release ${{ env.VERSION || github.ref }}
           files: Odex_app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
