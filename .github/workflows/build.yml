@@ -65,7 +65,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION || github.ref }}
-          release_name: Release ${{ env.VERSION || github.ref }}
+          name: Release ${{ env.VERSION || github.ref }}  # Ndryshimi këtu
           files: Odex_app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
