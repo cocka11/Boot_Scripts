@@ -37,9 +37,6 @@ jobs:
 
       - name: Install dependencies (nëse është e nevojshme)
         run: |
-          # Shtoni komandat për instalimin e varësive të nevojshme
-          # Për shembull:
-          # pip install -r requirements.txt
           echo "No dependencies to install."
 
       - name: Create zip archive
@@ -57,6 +54,12 @@ jobs:
         run: |
           echo "UPLOAD_RELEASE=${{ github.event.inputs.upload_release || 'no' }}" >> $GITHUB_ENV
           echo "VERSION=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_ENV
+
+      - name: Debugging Info
+        run: |
+          echo "UPLOAD_RELEASE=${{ env.UPLOAD_RELEASE }}"
+          echo "VERSION=${{ env.VERSION }}"
+          echo "GITHUB_REF=${{ github.ref }}"
 
       - name: Create Release and Upload Zip
         if: env.UPLOAD_RELEASE == 'yes' || startsWith(github.ref, 'refs/tags/')
