@@ -22,18 +22,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python (nëse është e nevojshme)
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies (nëse është e nevojshme)
+      - name: Set version environment variable
+        id: set_version
         run: |
-          echo "No dependencies to install."
+          echo "VERSION=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_ENV
 
       - name: Create zip archive
         run: |
           zip -r Odex_app.zip ./* -x '.git/*' '.github/*'
+
+      - name: Update update.json
+        run: |
+          echo "Updating update.json..."
+          echo '{
+            "version": "${{ env.VERSION }}",
+            "name": "Odex_app",
+            "description": "Moduli për azhurnimin automatik të Magisk",
+            "url": "https://github.com/cocka11/Odex_app/releases/latest/download/Odex_app.zip"
+          }' > update.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -41,32 +47,15 @@ jobs:
           name: Odex_app
           path: Odex_app.zip
 
-      - name: Set version environment variable
-        id: set_version
-        run: |
-          echo "VERSION=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_ENV
-
-      - name: Debugging Info
-        run: |
-          echo "VERSION=${{ env.VERSION }}"
-          echo "GITHUB_REF=${{ github.ref }}"
-
-      - name: Check Release Status
-        run: |
-          if [ -f Odex_app.zip ]; then
-            echo "Zip file exists, ready to upload."
-          else
-            echo "Error: Zip file does not exist."
-            exit 1
-          fi
-
       - name: Create Release and Upload Zip
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'push'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION || github.ref }}
           name: Release ${{ env.VERSION || github.ref }}
-          files: Odex_app.zip  # Sigurohuni që emri është i saktë dhe në rrugën e duhur
+          files: |
+            Odex_app.zip
+            update.json  # Ngarko edhe skedarin JSON
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
