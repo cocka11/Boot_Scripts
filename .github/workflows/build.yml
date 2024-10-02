@@ -61,6 +61,15 @@ jobs:
           echo "VERSION=${{ env.VERSION }}"
           echo "GITHUB_REF=${{ github.ref }}"
 
+      - name: Check Release Status
+        run: |
+          if [ -f Odex_app.zip ]; then
+            echo "Zip file exists, ready to upload."
+          else
+            echo "Error: Zip file does not exist."
+            exit 1
+          fi
+
       - name: Create Release and Upload Zip
         if: env.UPLOAD_RELEASE == 'yes' || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
