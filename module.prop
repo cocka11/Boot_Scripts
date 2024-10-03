@@ -1,6 +1,7 @@
-name=Odex App
-version=1.0.9A
+id=Odex_app
+name=Odex app
+version=v1.0.9A
 versionCode=109A
 author=cocka11
-description=This is the Odex App module for Magisk.
+description=This script as test
 updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
