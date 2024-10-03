@@ -62,9 +62,10 @@ jobs:
       # 7. Përditësoj update.json me versionin e ri dhe zipUrl
       - name: Përditësoj update.json me versionin e ri dhe zipUrl
         run: |
+          echo "Updating update.json with new version and zipUrl"
           node -e '
             const fs = require("fs");
-            const path = "update.json"; // Ndrysho rrugën nëse është ndryshe
+            const path = "update.json"; // Sigurohu që rruga është e saktë
             const version = process.env.VERSION;
             const downloadUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/Odex_app_${version}.zip`;
             let data = {};
