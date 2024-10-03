@@ -4,4 +4,3 @@ versionCode=109
 author=cocka11
 description=This is the Odex App module for Magisk.
 updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
-minMagisk=2400
