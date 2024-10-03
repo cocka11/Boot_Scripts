@@ -39,16 +39,12 @@ jobs:
       - name: Update update.json
         run: |
           echo "Updating update.json..."
-          cat <<EOF > update.json          
-          }
-          "version": "${{ env.VERSION }}",
-          "versionCode": 103,
-          "zipUrl": "https://github.com/cocka11/Odex_app/releases/download/v$",
-          "changelog": "https://github.com/cocka11/Odex_app/releases/download/v1.0.3/changelog.txt",
-          "module": "odex_app",
-          "minMagiskVersion": "24.0"
-          }
-          EOF
+          cat <<EOF > update.json
+           {
+              "version": "${{ env.VERSION }}"
+           "zipUrl": "https://github.com/cocka11/Odex_app/releases/download/v$",
+               }
+            EOF
 
       - name: Commit and Push update.json
         if: startsWith(github.ref, 'refs/tags/')
