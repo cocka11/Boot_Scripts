@@ -42,7 +42,7 @@ jobs:
       # 4. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
-          ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
+          ZIP_NAME="odex_app_${{ env.VERSION }}.zip"
           echo "Creating ZIP: $ZIP_NAME"
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
@@ -60,13 +60,13 @@ jobs:
             const fs = require("fs");
             const path = "update.json"; // Ndrysho rrugën nëse është ndryshe
             const version = process.env.VERSION;
-            const downloadUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/Odex_app_${version}.zip`;
+            const downloadUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/odex_app_${version}.zip`;
             let data = {};
             if (fs.existsSync(path)) {
               data = JSON.parse(fs.readFileSync(path, "utf8"));
             }
             data.version = version;
-            data.url = downloadUrl;
+            data.zipurl = downloadUrl;
             fs.writeFileSync(path, JSON.stringify(data, null, 2));
             console.log("Updated update.json with new version and download URL.");
           '
@@ -91,7 +91,7 @@ jobs:
           tag_name: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
           files: |
-            Odex_app_${{ env.VERSION }}.zip
+            odex_app_${{ env.VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
