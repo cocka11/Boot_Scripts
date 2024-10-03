@@ -3,7 +3,7 @@ name: Build Magisk Module Zip
 on:
   push:
     tags:
-      - 'v*.*.*'  # Tag pattern, e.g., v1.0.2
+      - 'v*.*.*'  # Trigger on version tags, e.g., v1.0.2
   workflow_dispatch:
     inputs:
       version:
@@ -23,51 +23,59 @@ jobs:
       - name: Set version environment variable
         id: set_version
         run: |
-          VERSION=${{ github.ref }}
-          VERSION=${VERSION#refs/tags/}  # Heq prefiksin refs/tags/
-          echo "VERSION=${{ github.event.inputs.version || VERSION }}" >> $GITHUB_ENV
+          VERSION=${{ github.event.inputs.version || github.ref }}
+          VERSION=${VERSION#refs/tags/}  # Heq prefiksin refs/tags/ nga tag-u
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Display Version
+        run: echo "Building version ${{ env.VERSION }}"
 
       - name: Create zip archive
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
+          echo "Creating ZIP: $ZIP_NAME"
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
       - name: Update update.json
         run: |
           echo "Updating update.json..."
-          echo '{
+          cat <<EOF > update.json
+          {
             "version": "${{ env.VERSION }}",
             "name": "Odex_app",
             "description": "Moduli për azhurnimin automatik të Magisk",
-            "url": "https://github.com/cocka11/Odex_app/releases/download/${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip"
-          }' > update.json
+            "url": "https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip"
+          }
+          EOF
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Odex_app
-          path: Odex_app_${{ env.VERSION }}.zip
+          path: |
+            Odex_app_${{ env.VERSION }}.zip
+            update.json
 
       - name: List Files After Zip Creation
         run: |
-          echo "Listing files after creating the zip:"
+          echo "Listing files after creating the zip and update.json:"
           ls -la
 
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.VERSION }}
-          name: Release ${{ env.VERSION }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
           files: |
-            ./Odex_app_${{ env.VERSION }}.zip
-            ./update.json
+            Odex_app_${{ env.VERSION }}.zip
+            update.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check Upload Status
         run: |
-          echo "Check if the zip was uploaded successfully."
+          echo "Verifikoni nëse ZIP dhe update.json u ngarkuan me sukses në release."
           curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }}/releases
+               https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ env.VERSION }}
