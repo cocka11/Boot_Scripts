@@ -1,6 +1,6 @@
 {
-	"version": "v1.18.0",
-	"versionCode": 22,
-	"zipUrl": "https://github.com/cocka11/Odex_app/releases/download/",
-	"changelog": "https://raw.githubusercontent.com/j-hc/zygisk-detach/master/README.md"
+  "version": "1.0.3",
+  "name": "Odex_app",
+  "description": "Moduli për azhurnimin automatik të Magisk",
+  "url": "https://github.com/cocka11/Odex_app/releases/download/v1.0.3/Odex_app_1.0.3.zip"
 }
