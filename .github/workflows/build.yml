@@ -60,9 +60,8 @@ jobs:
           ls -la
 
       # 7. Përditësoj update.json me versionin e ri dhe zipUrl
-      - name: Përditësoj update.json me versionin e ri dhe zipUrl
+      - name: Përditësoj update.json
         run: |
-          echo "Updating update.json with new version and zipUrl"
           node -e '
             const fs = require("fs");
             const path = "update.json"; // Sigurohu që rruga është e saktë
@@ -73,7 +72,7 @@ jobs:
               data = JSON.parse(fs.readFileSync(path, "utf8"));
             }
             data.version = version;
-            data.zipUrl = downloadUrl;
+            data.zipUrl = downloadUrl; // Përdor zipUrl me shkronja të mëdha
             fs.writeFileSync(path, JSON.stringify(data, null, 2));
             console.log("Updated update.json with new version and zipUrl.");
           '
