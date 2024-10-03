@@ -2,10 +2,8 @@ name: Build Magisk Module Zip
 
 on:
   push:
-    branches:
-      - main
-  release:
-    types: [created]
+    tags:
+      - 'v*.*.*'  # Tag pattern, e.g., v1.0.2
   workflow_dispatch:
     inputs:
       version:
@@ -25,13 +23,15 @@ jobs:
       - name: Set version environment variable
         id: set_version
         run: |
-          echo "VERSION=${{ github.event.inputs.version || 'latest' }}" >> $GITHUB_ENV
+          VERSION=${{ github.ref }}
+          VERSION=${VERSION#refs/tags/}  # Heq prefiksin refs/tags/
+          echo "VERSION=${{ github.event.inputs.version || VERSION }}" >> $GITHUB_ENV
 
       - name: Create zip archive
         run: |
-          ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"  # Përdorni versionin në emrin e skedarit
+          ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
-          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV  # Ruani emrin e skedarit në variablin e ambientit
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
       - name: Update update.json
         run: |
@@ -40,24 +40,28 @@ jobs:
             "version": "${{ env.VERSION }}",
             "name": "Odex_app",
             "description": "Moduli për azhurnimin automatik të Magisk",
-            "url": "https://github.com/cocka11/Odex_app/releases/latest/download/Odex_app_${{ env.VERSION }}.zip"
+            "url": "https://github.com/cocka11/Odex_app/releases/download/${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip"
           }' > update.json
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: Odex_app
-          path: Odex_app_${{ env.VERSION }}.zip  # Përdorni emrin e ri të skedarit
+          path: Odex_app_${{ env.VERSION }}.zip
+
+      - name: List Files After Zip Creation
+        run: |
+          echo "Listing files after creating the zip:"
+          ls -la
 
       - name: Create Release and Upload Zip
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'push'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.VERSION || github.ref }}
-          name: Release ${{ env.VERSION || github.ref }}
+          tag_name: ${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
           files: |
-            Odex_app_${{ env.VERSION }}.zip  # Përdorni emrin e ri të skedarit
-            update.json  # Ngarko edhe skedarin JSON
+            ./Odex_app_${{ env.VERSION }}.zip
+            ./update.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
