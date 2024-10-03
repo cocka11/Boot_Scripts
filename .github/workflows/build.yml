@@ -89,6 +89,7 @@ jobs:
           file_pattern: |
             module.prop
             update.json
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Përshtatur për versionin e mëparshëm
 
       # 9. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
