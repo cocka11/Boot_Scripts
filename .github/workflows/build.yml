@@ -54,7 +54,33 @@ jobs:
           echo "Listing files after creating the zip and update.json:"
           ls -la
 
-      # 10. Krijo Release dhe Ngarko ZIP-in
+      # 10. Përditësoj update.json me versionin e ri
+      - name: Përditësoj update.json me versionin e ri
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'update.json'; // Ndrysho rrugën nëse është ndryshe
+            const version = process.env.VERSION;
+            let data = {};
+            if (fs.existsSync(path)) {
+              data = JSON.parse(fs.readFileSync(path, 'utf8'));
+            }
+            data.version = version;
+            fs.writeFileSync(path, JSON.stringify(data, null, 2));
+          "
+        env:
+          VERSION: ${{ env.VERSION }}
+
+      # 11. Commit dhe push ndryshimet në update.json
+      - name: Commit dhe push update.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
+          branch: main
+          file_pattern: update.json
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 12. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -65,7 +91,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 11. Kontrollo Statusin e Ngarkimit
+      # 13. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
