@@ -70,18 +70,38 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
 
-      # 7. Përditësoj module.prop me versionin e ri
-      - name: Përditësoj module.prop me versionin e ri
+      # 7. Përditësoj module.prop me versionin e ri - Metoda 1: Përdor sed me Debugging
+      - name: Përditësoj module.prop me versionin e ri (sed)
         run: |
           MODULE_PROP_PATH="module.prop"  # Ndrysho nëse është në një rrugë tjetër
           if [ -f "$MODULE_PROP_PATH" ]; then
+            echo "Module.prop para përditësimit:"
+            cat $MODULE_PROP_PATH
             echo "Updating version in $MODULE_PROP_PATH to ${{ env.VERSION }}"
             # Kërkon që versioni të jetë në formatin version=1.0.0
             sed -i "s/^version=.*/version=${{ env.VERSION }}/" $MODULE_PROP_PATH
+            echo "Module.prop pas përditësimit:"
+            cat $MODULE_PROP_PATH
           else
             echo "Error: $MODULE_PROP_PATH nuk u gjet."
             exit 1
           fi
+
+      # 7. Përditësoj module.prop me versionin e ri - Metoda 2: Përdor Node.js (Opsionale)
+      # Ky hap është opsional dhe mund të përdoret nëse sed nuk funksionon
+      #- name: Përditësoj module.prop me versionin e ri (Node.js)
+      #  run: |
+      #    node -e "
+      #      const fs = require('fs');
+      #      const path = 'module.prop'; // Ndrysho rrugën nëse është ndryshe
+      #      const version = process.env.VERSION;
+      #      let data = fs.readFileSync(path, 'utf8');
+      #      const updatedData = data.replace(/^version=.*/m, `version=${version}`);
+      #      fs.writeFileSync(path, updatedData, 'utf8');
+      #      console.log(`Updated module.prop to version ${version}`);
+      #    "
+      #  env:
+      #    VERSION: ${{ env.VERSION }}
 
       # 8. Commit dhe push ndryshimet në update.json dhe module.prop
       - name: Commit dhe push ndryshimet
