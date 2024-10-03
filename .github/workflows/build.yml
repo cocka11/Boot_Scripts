@@ -56,20 +56,20 @@ jobs:
       # 6. Përditësoj update.json me versionin e ri dhe URL-në e re
       - name: Përditësoj update.json me versionin e ri dhe URL-në e re
         run: |
-          node -e "
-            const fs = require('fs');
-            const path = 'update.json'; // Ndrysho rrugën nëse është ndryshe
+          node -e '
+            const fs = require("fs");
+            const path = "update.json"; // Ndrysho rrugën nëse është ndryshe
             const version = process.env.VERSION;
             const downloadUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/Odex_app_${version}.zip`;
             let data = {};
             if (fs.existsSync(path)) {
-              data = JSON.parse(fs.readFileSync(path, 'utf8'));
+              data = JSON.parse(fs.readFileSync(path, "utf8"));
             }
             data.version = version;
             data.url = downloadUrl;
             fs.writeFileSync(path, JSON.stringify(data, null, 2));
-            console.log('Updated update.json with new version and download URL.');
-          "
+            console.log("Updated update.json with new version and download URL.");
+          '
         env:
           VERSION: ${{ env.VERSION }}
           GITHUB_REPOSITORY: ${{ github.repository }}
