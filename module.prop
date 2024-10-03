@@ -1,6 +1,8 @@
-id=debload
-name=Remove Debload
-version=v1.0
-versionCode=1
+updateJson=https://github.com/cocka11/Odex_app/raw/main/update.jsonid=odex_app
+name=Odex App
+version=1.0.3
+versionCode=103
 author=cocka11
-description=This
+description=This is the Odex App module for Magisk.
+updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
+minMagisk=2400
