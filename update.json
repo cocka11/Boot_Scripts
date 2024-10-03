@@ -1,6 +1,7 @@
 {
-  "version": "4.0",
+  "version": "4.1",
   "versionCode": 103,
   "changelog": "https://github.com/cocka11/Odex_app/releases/download/v1.0.3/changelog.txt",
-  "url": "https://github.com/cocka11/Odex_app/releases/download/v4.0/Odex_app_4.0.zip"
+  "url": "https://github.com/cocka11/Odex_app/releases/download/v4.0/Odex_app_4.0.zip",
+  "zipurl": "https://github.com/cocka11/Odex_app/releases/download/v4.1/odex_app_4.1.zip"
 }
