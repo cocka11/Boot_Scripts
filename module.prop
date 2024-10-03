@@ -1,7 +1,7 @@
-id=Odex_app
-name=Odex app
-version=v1.0.9A
-versionCode=109A
+id=odex_app
+name=Odex App
+version=0.1
+versionCode=01
 author=cocka11
-description=This script as test
+description=This script is to remove unwanted applications on your android system. works for all devices that have root access. to execute open the emulator terminal or termux and press su then deblo.
 updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
