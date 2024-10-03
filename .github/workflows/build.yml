@@ -53,68 +53,38 @@ jobs:
           echo "Listing files after creating the zip and update.json:"
           ls -la
 
-      # 6. Përditësoj update.json me versionin e ri
-      - name: Përditësoj update.json me versionin e ri
+      # 6. Përditësoj update.json me versionin e ri dhe URL-në e re
+      - name: Përditësoj update.json me versionin e ri dhe URL-në e re
         run: |
           node -e "
             const fs = require('fs');
             const path = 'update.json'; // Ndrysho rrugën nëse është ndryshe
             const version = process.env.VERSION;
+            const downloadUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/releases/download/v${version}/Odex_app_${version}.zip`;
             let data = {};
             if (fs.existsSync(path)) {
               data = JSON.parse(fs.readFileSync(path, 'utf8'));
             }
             data.version = version;
+            data.url = downloadUrl;
             fs.writeFileSync(path, JSON.stringify(data, null, 2));
+            console.log('Updated update.json with new version and download URL.');
           "
         env:
           VERSION: ${{ env.VERSION }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # 7. Përditësoj module.prop me versionin e ri - Metoda 1: Përdor sed me Debugging
-      - name: Përditësoj module.prop me versionin e ri (sed)
-        run: |
-          MODULE_PROP_PATH="module.prop"  # Ndrysho nëse është në një rrugë tjetër
-          if [ -f "$MODULE_PROP_PATH" ]; then
-            echo "Module.prop para përditësimit:"
-            cat $MODULE_PROP_PATH
-            echo "Updating version in $MODULE_PROP_PATH to ${{ env.VERSION }}"
-            # Kërkon që versioni të jetë në formatin version=1.0.0
-            sed -i "s/^version=.*/version=${{ env.VERSION }}/" $MODULE_PROP_PATH
-            echo "Module.prop pas përditësimit:"
-            cat $MODULE_PROP_PATH
-          else
-            echo "Error: $MODULE_PROP_PATH nuk u gjet."
-            exit 1
-          fi
-
-      # 7. Përditësoj module.prop me versionin e ri - Metoda 2: Përdor Node.js (Opsionale)
-      # Ky hap është opsional dhe mund të përdoret nëse sed nuk funksionon
-      #- name: Përditësoj module.prop me versionin e ri (Node.js)
-      #  run: |
-      #    node -e "
-      #      const fs = require('fs');
-      #      const path = 'module.prop'; // Ndrysho rrugën nëse është ndryshe
-      #      const version = process.env.VERSION;
-      #      let data = fs.readFileSync(path, 'utf8');
-      #      const updatedData = data.replace(/^version=.*/m, `version=${version}`);
-      #      fs.writeFileSync(path, updatedData, 'utf8');
-      #      console.log(`Updated module.prop to version ${version}`);
-      #    "
-      #  env:
-      #    VERSION: ${{ env.VERSION }}
-
-      # 8. Commit dhe push ndryshimet në update.json dhe module.prop
+      # 7. Commit dhe push ndryshimet në update.json
       - name: Commit dhe push ndryshimet
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
+          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }} dhe URL-në e re"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
             update.json
-            module.prop
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 9. Krijo Release dhe Ngarko ZIP-in
+      # 8. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -125,7 +95,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 10. Kontrollo Statusin e Ngarkimit
+      # 9. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
