@@ -1,7 +1,6 @@
-updateJson=https://github.com/cocka11/Odex_app/raw/main/update.jsonid=odex_app
 name=Odex App
-version=1.0.3
-versionCode=103
+version=1.0.0
+versionCode=100
 author=cocka11
 description=This is the Odex App module for Magisk.
 updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
