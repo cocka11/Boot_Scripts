@@ -28,7 +28,7 @@ jobs:
         id: set_version
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            VERSION=${{ github.event.inputs.version || github.ref }}
+            VERSION=${{ github.ref }}
             VERSION=${VERSION#refs/tags/}  # Heq prefiksin refs/tags/ nga tag-u
             VERSION=${VERSION#v}  # Heq 'v' nga fillimi
           else
@@ -39,8 +39,14 @@ jobs:
       # 3. Shfaq versionin për verifikim
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
-  
-      # 8. Krijo skedarin ZIP me emër versioni
+
+      # 4. Ndërto projektin (nëse ka nevojë)
+      - name: Ndërto projektin
+        run: |
+          npm install
+          npm run build
+
+      # 5. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
@@ -48,13 +54,13 @@ jobs:
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 9. Listo skedarët për verifikim
+      # 6. Listo skedarët për verifikim
       - name: List Files After Zip Creation
         run: |
           echo "Listing files after creating the zip and update.json:"
           ls -la
 
-      # 10. Përditësoj update.json me versionin e ri
+      # 7. Përditësoj update.json me versionin e ri
       - name: Përditësoj update.json me versionin e ri
         run: |
           node -e "
@@ -71,16 +77,31 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
 
-      # 11. Commit dhe push ndryshimet në update.json
-      - name: Commit dhe push update.json
+      # 8. Përditësoj module.prop me versionin e ri
+      - name: Përditësoj module.prop me versionin e ri
+        run: |
+          MODULE_PROP_PATH="module.prop"  # Ndrysho nëse është në një rrugë tjetër
+          if [ -f "$MODULE_PROP_PATH" ]; then
+            echo "Updating version in $MODULE_PROP_PATH to ${{ env.VERSION }}"
+            # Kërkon që versioni të jetë në formatin version=1.0.0
+            sed -i "s/^version=.*/version=${{ env.VERSION }}/" $MODULE_PROP_PATH
+          else
+            echo "Error: $MODULE_PROP_PATH nuk u gjet."
+            exit 1
+          fi
+
+      # 9. Commit dhe push ndryshimet në update.json dhe module.prop
+      - name: Commit dhe push ndryshimet
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
-          branch: main
-          file_pattern: update.json
+          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
+          branch: main  # Sigurohu që kjo është dega e duhur
+          file_pattern: |
+            update.json
+            module.prop
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 12. Krijo Release dhe Ngarko ZIP-in
+      # 10. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -91,7 +112,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 13. Kontrollo Statusin e Ngarkimit
+      # 11. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
