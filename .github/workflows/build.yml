@@ -46,11 +46,11 @@ jobs:
           sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" update.json
           echo "Updated update.json with version ${{ env.VERSION }} and zipUrl"
 
-      # 5. Kontrollo përditësimin e update.json
-      - name: Verify update.json Update
+      # 5. Përditësoj versionin në module.prop
+      - name: Update version in module.prop
         run: |
-          echo "Contents of update.json after update:"
-          cat update.json
+          sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
+          echo "Updated module.prop with version ${{ env.VERSION }}"
 
       # 6. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
@@ -60,14 +60,15 @@ jobs:
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 7. Commit dhe push ndryshimet në update.json
+      # 7. Commit dhe push ndryshimet në update.json dhe module.prop
       - name: Commit dhe push ndryshimet
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
+          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
             update.json
+            module.prop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
