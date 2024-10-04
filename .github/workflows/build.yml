@@ -39,7 +39,13 @@ jobs:
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
 
-      # 4. Krijo skedarin ZIP me emër versioni
+      # 4. Përditësoj versionin në module.prop
+      - name: Update version in module.prop
+        run: |
+          sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
+          echo "Updated module.prop with version ${{ env.VERSION }}"
+
+      # 5. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
@@ -47,13 +53,13 @@ jobs:
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 5. Listo skedarët për verifikim
+      # 6. Listo skedarët për verifikim
       - name: List Files After Zip Creation
         run: |
           echo "Listing files after creating the zip and update.json:"
           ls -la
 
-      # 6. Përditësoj update.json me versionin e ri dhe zipUrl
+      # 7. Përditësoj update.json me versionin e ri dhe zipUrl
       - name: Përditësoj update.json
         run: |
           node -e '
@@ -74,17 +80,18 @@ jobs:
           VERSION: ${{ env.VERSION }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # 7. Commit dhe push ndryshimet në update.json
+      # 8. Commit dhe push ndryshimet në module.prop dhe update.json
       - name: Commit dhe push ndryshimet
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
+          commit_message: "Përditësoj module.prop dhe update.json me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
+            module.prop
             update.json
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. Krijo Release dhe Ngarko ZIP-in
+      # 9. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -95,7 +102,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 9. Kontrollo Statusin e Ngarkimit
+      # 10. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
