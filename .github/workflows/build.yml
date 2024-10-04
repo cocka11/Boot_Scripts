@@ -85,8 +85,8 @@ jobs:
           commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
-            module.prop
             update.json
+            module.prop
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # 8. Krijo Release dhe Ngarko ZIP-in
