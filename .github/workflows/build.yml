@@ -38,7 +38,11 @@ jobs:
       # 3. Shfaq versionin për verifikim
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
-
+      # 4. Përditësoj versionin në module.prop
+      - name: Update version in module.prop
+        run: |
+          sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
+          echo "Updated module.prop with version ${{ env.VERSION }}"
       # 4. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
@@ -81,6 +85,7 @@ jobs:
           commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
+            module.prop
             update.json
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
