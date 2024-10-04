@@ -59,13 +59,7 @@ jobs:
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 7. Listo skedarët për verifikim
-      - name: List Files After Zip Creation
-        run: |
-          echo "Listing files after creating the zip and update.json:"
-          ls -la
-
-      # 8. Përditësoj update.json me versionin e ri dhe zipUrl
+      # 7. Përditësoj update.json me versionin e ri dhe zipUrl
       - name: Përditësoj update.json
         run: |
           node -e '
@@ -86,13 +80,13 @@ jobs:
           VERSION: ${{ env.VERSION }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # 9. Kontrollo përditësimin e update.json
+      # 8. Kontrollo përditësimin e update.json
       - name: Verify update.json Update
         run: |
           echo "Contents of update.json after update:"
           cat update.json
 
-      # 10. Commit dhe push ndryshimet në module.prop dhe update.json
+      # 9. Commit dhe push ndryshimet në module.prop dhe update.json
       - name: Commit dhe push ndryshimet
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
@@ -104,7 +98,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 11. Krijo Release dhe Ngarko ZIP-in
+      # 10. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -115,7 +109,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 12. Kontrollo Statusin e Ngarkimit
+      # 11. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
