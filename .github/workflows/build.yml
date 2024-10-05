@@ -60,33 +60,33 @@ jobs:
           zip -r $ZIP_NAME * -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 7. Commit dhe push ndryshimet në update.json dhe module.prop
-      - name: Commit dhe push ndryshimet
+      # 7. Përdor sed për të përditësuar versionin në update.json
+      - name: Update version in update.json
+        run: |
+          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" update.json
+          sed -i "s/\"zipUrl\":.*/\"zipUrl\": \"https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\"/" update.json
+
+      # 8. Commit dhe push ndryshimet në update.json
+      - name: Commit dhe push ndryshimet në update.json
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
-          branch: cocka11  # Sigurohu që kjo është dega e duhur
-          file_pattern: |
-            update.json
-            module.prop
+          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
+          branch: cocka11  # Emri i duhur i degës
+          file_pattern: update.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 8. Krijo Release dhe Ngarko ZIP-in
-      - name: Create Release and Upload Zip
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.VERSION }}
-          name: Release v${{ env.VERSION }}
-          files: |
-            Odex_app_${{ env.VERSION }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 9. Kontrollo Statusin e Ngarkimit
-      - name: Check Upload Status
+      # 9. Përdor sed për të përditësuar versionin në module.prop
+      - name: Update version in module.prop
         run: |
-          echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
-          curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ github.repository }}/releases/tags/v${{ env.VERSION }}
+          sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
+
+      # 10. Commit dhe push ndryshimet në module.prop
+      - name: Commit dhe push ndryshimet në module.prop
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Përditësoj module.prop me versionin ${{ env.VERSION }}"
+          branch: cocka11  # Emri i duhur i degës
+          file_pattern: module.prop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
