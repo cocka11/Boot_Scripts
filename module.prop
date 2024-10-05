@@ -4,4 +4,4 @@ version=01
 versionCode=21
 author=cocka11
 description=This script is to remove unwanted applications on your android system. works for all devices that have root access. to execute open the emulator terminal or termux and press su then deblo.
-updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
+updateJson=updateJson=https://github.com/cocka11/Odex_app/raw/main/update.json
