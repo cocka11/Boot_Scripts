@@ -81,6 +81,25 @@ jobs:
         run: |
           sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
 
+          # 6. Krijo skedarin ZIP me emër versioni
+      - name: Create zip archive
+        run: |
+          ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
+          echo "Creating ZIP: $ZIP_NAME"
+          zip -r $ZIP_NAME * -x '.git/*' '.github/*'
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+          
+       # 8. Krijo Release dhe Ngarko ZIP-in
+      - name: Create Release and Upload Zip
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
+          files: |
+            Odex_app_${{ env.VERSION }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       # 10. Commit dhe push ndryshimet në module.prop
       - name: Commit dhe push ndryshimet në module.prop
         uses: stefanzweifel/git-auto-commit-action@v4
