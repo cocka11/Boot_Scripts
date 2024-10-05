@@ -42,8 +42,8 @@ jobs:
       # 4. Përditësoj versionin dhe zipUrl në update.json
       - name: Update version and zipUrl in update.json
         run: |
-          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" Boot_scripts/cocka11/update.json
-          sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" Boot_scripts/cocka11/update.json
+          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" cocka11/update.json
+          sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" cocka11/update.json
           echo "Updated update.json with version ${{ env.VERSION }} and zipUrl"
 
       # 5. Përditësoj versionin në module.prop
@@ -67,7 +67,7 @@ jobs:
           commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
-            Boot_scripts/cocka11/update.json
+            cocka11/update.json
             cocka11/module.prop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
