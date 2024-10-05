@@ -1,6 +1,6 @@
 {
-  "version": "1.3B",
-  "versionCode": 103,
-  "zipUrl": "https://github.com/cocka11/Odex_app/releases/download/v1.3B/Odex_app_1.3B.zip",
-  "changelog": "https://github.com/cocka11/Odex_app/blob/main/README.md"
+  "version": "1.0",
+  "versionCode": 1,
+  "zipUrl": "https://github.com/cocka11/Odex_app/releases/download/v1.0/Odex_app.zip",
+  "changelog": "Some changelog text here."
 }
