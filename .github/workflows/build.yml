@@ -39,49 +39,20 @@ jobs:
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
 
-      # 4. List Repository Files për diagnostikë
-      - name: List Repository Files
+      # 4. Përditësoj versionin dhe zipUrl në update.json
+      - name: Update version and zipUrl in update.json
         run: |
-          echo "Listing all files in the repository root:"
-          ls -R
+          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" update.json
+          sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" update.json
+          echo "Updated update.json with version ${{ env.VERSION }} and zipUrl"
 
-      # 5. Përditëso module.prop me versionin e ri
-      - name: Update module.prop
+      # 5. Përditësoj versionin në module.prop
+      - name: Update version in module.prop
         run: |
-          MODULE_PROP_PATH="./module.prop"  # Rruga e saktë për module.prop në rrënjë
-          if [ -f "$MODULE_PROP_PATH" ]; then
-            sed -i "s/^version=.*/version=${{ env.VERSION }}/" "$MODULE_PROP_PATH"
-            echo "Updated module.prop to version ${{ env.VERSION }}"
-          else
-            echo "module.prop not found at $MODULE_PROP_PATH"
-            exit 1
-          fi
+          sed -i "s/version=.*/version=${{ env.VERSION }}/" module.prop
+          echo "Updated module.prop with version ${{ env.VERSION }}"
 
-      # 6. Instaloni jq në rast se nuk është i disponueshëm
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      # 7. Përditëso update.json me versionin e ri dhe URL-në
-      - name: Update update.json
-        run: |
-          UPDATE_JSON_PATH="./update.json"  # Rruga e saktë për update.json në rrënjë
-          if [ -f "$UPDATE_JSON_PATH" ]; then
-            REPO_URL="https://github.com/${{ github.repository }}"
-            ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
-            RELEASE_URL="${REPO_URL}/releases/download/v${{ env.VERSION }}/${ZIP_NAME}"
-            jq --arg ver "${{ env.VERSION }}" --arg url "${RELEASE_URL }}" '.version = $ver | .url = $url' "$UPDATE_JSON_PATH" > tmp.json
-            mv tmp.json "$UPDATE_JSON_PATH"
-            echo "Updated update.json to version ${{ env.VERSION }} and url $RELEASE_URL"
-          else
-            echo "update.json not found at $UPDATE_JSON_PATH"
-            exit 1
-          fi
-
-      # 8. Shfaq ndryshimet në git (Opsionale)
-      - name: Show Git Diff
-        run: git diff
-
-      # 9. Krijo skedarin ZIP me emër versioni
+      # 6. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
@@ -89,7 +60,19 @@ jobs:
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 10. Krijo Release dhe Ngarko ZIP-in
+      # 7. Commit dhe push ndryshimet në update.json dhe module.prop
+      - name: Commit dhe push ndryshimet
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
+          branch: main  # Sigurohu që kjo është dega e duhur
+          file_pattern: |
+            update.json
+            module.prop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 8. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -100,7 +83,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 11. Kontrollo Statusin e Ngarkimit
+      # 9. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
