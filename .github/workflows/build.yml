@@ -42,14 +42,14 @@ jobs:
       # 4. Përditësoj versionin dhe zipUrl në update.json
       - name: Update version and zipUrl in update.json
         run: |
-          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" cocka11/update.json
-          sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" cocka11/update.json
+          sed -i "s/\"version\":.*/\"version\": \"${{ env.VERSION }}\",/" update.json
+          sed -i "s#\"zipUrl\":.*#\"zipUrl\": \"https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",#" update.json
           echo "Updated update.json with version ${{ env.VERSION }} and zipUrl"
 
       # 5. Përditësoj versionin në module.prop
       - name: Update version in module.prop
         run: |
-          sed -i "s/version=.*/version=${{ env.VERSION }}/" cocka11/module.prop
+          sed -i "s/version=.*/version=${{ env.VERSION }}/" module.prop
           echo "Updated module.prop with version ${{ env.VERSION }}"
 
       # 6. Krijo skedarin ZIP me emër versioni
@@ -57,7 +57,7 @@ jobs:
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
           echo "Creating ZIP: $ZIP_NAME"
-          zip -r $ZIP_NAME cocka11/* -x '.git/*' '.github/*'
+          zip -r $ZIP_NAME * -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
       # 7. Commit dhe push ndryshimet në update.json dhe module.prop
@@ -67,8 +67,8 @@ jobs:
           commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
           branch: main  # Sigurohu që kjo është dega e duhur
           file_pattern: |
-            cocka11/update.json
-            cocka11/module.prop
+            update.json
+            module.prop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
