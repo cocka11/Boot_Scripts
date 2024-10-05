@@ -2,4 +2,5 @@
   "version": "10.2",
   "versionCode": 103,
   "zipUrl": "https://github.com/cocka11/Odex_app/releases/download/v10.2/Odex_app_10.2.zip",
+	"changelog": "https://raw.githubusercontent.com/j-hc/zygisk-detach/master/README.md"
 }
