@@ -65,7 +65,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
-          branch: main  # Sigurohu që kjo është dega e duhur
+          branch: cocka11  # Sigurohu që kjo është dega e duhur
           file_pattern: |
             update.json
             module.prop
