@@ -1,7 +1,7 @@
 id=boot_scripts
 name=Boot Scripts
-version=1.4
-versionCode=4
+version=1.5
+versionCode=5
 author=cocka11
 description=Test
 updateJson=https://raw.githubusercontent.com/cocka11/Boot_scripts/cocka11/update.json
