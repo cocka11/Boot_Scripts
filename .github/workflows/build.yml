@@ -28,7 +28,8 @@ jobs:
         id: set_version
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            VERSION=${GITHUB_REF#refs/tags/}  # Heq prefiksin refs/tags/ nga tag-u
+            VERSION=${{ github.event.ref }}
+            VERSION=${VERSION#refs/tags/}  # Heq prefiksin refs/tags/ nga tag-u
             VERSION=${VERSION#v}  # Heq 'v' nga fillimi
           else
             VERSION=${{ github.event.inputs.version }}
@@ -39,58 +40,46 @@ jobs:
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
 
-      # 4. Përditësoj versionin në module.prop
+      # 4. Përdor sed për të përditësuar versionin në update.json
+      - name: Update version in update.json
+        run: |
+          sed -i "s@\"version\":.*@\"version\": \"${{ env.VERSION }}\",@" update.json
+          sed -i "s@\"zipUrl\":.*@\"zipUrl\": \"https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\"@" update.json
+
+      # 5. Commit dhe push ndryshimet në update.json
+      - name: Commit dhe push ndryshimet në update.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Përditësoj update.json me versionin ${{ env.VERSION }}"
+          branch: cocka11  # Emri i duhur i degës
+          file_pattern: update.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 6. Përdor sed për të përditësuar versionin në module.prop
       - name: Update version in module.prop
         run: |
           sed -i "s/^version=.*/version=${{ env.VERSION }}/" module.prop
-          echo "Updated module.prop with version ${{ env.VERSION }}"
 
-      # 5. Kontrollo përditësimin e module.prop
-      - name: Verify module.prop Update
-        run: |
-          echo "Contents of module.prop after update:"
-          cat module.prop
-
-      # 6. Përditësoj versionin dhe zipUrl në update.json me jq
-      - name: Update version and zipUrl in update.json
-        run: |
-          # Install jq
-          sudo apt-get update
-          sudo apt-get install -y jq
-          # Përditësoj JSON
-          jq --arg version "${{ env.VERSION }}" \
-             --arg zipUrl "https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip" \
-             '.version = $version | .zipUrl = $zipUrl' \
-             update.json > tmp.json && mv tmp.json update.json
-          echo "Updated update.json with version ${{ env.VERSION }} and zipUrl"
-
-      # 7. Kontrollo përditësimin e update.json
-      - name: Verify update.json Update
-        run: |
-          echo "Contents of update.json after update:"
-          cat update.json
+      # 7. Commit dhe push ndryshimet në module.prop
+      - name: Commit dhe push ndryshimet në module.prop
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Përditësoj module.prop me versionin ${{ env.VERSION }}"
+          branch: cocka11  # Emri i duhur i degës
+          file_pattern: module.prop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # 8. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
           ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
           echo "Creating ZIP: $ZIP_NAME"
-          zip -r $ZIP_NAME * -x '.git/*' '.github/*'
+          zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
 
-      # 9. Commit dhe push ndryshimet në update.json dhe module.prop
-      - name: Commit dhe push ndryshimet
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Përditësoj update.json dhe module.prop me versionin ${{ env.VERSION }}"
-          branch: cocka11  # Emri i duhur i degës
-          file_pattern: |
-            update.json
-            module.prop
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 10. Krijo Release dhe Ngarko ZIP-in
+      # 9. Krijo Release dhe Ngarko ZIP-in
       - name: Create Release and Upload Zip
         uses: softprops/action-gh-release@v1
         with:
@@ -101,7 +90,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 11. Kontrollo Statusin e Ngarkimit
+      # 10. Kontrollo Statusin e Ngarkimit
       - name: Check Upload Status
         run: |
           echo "Verifikoni nëse ZIP u ngarkua me sukses në release."
