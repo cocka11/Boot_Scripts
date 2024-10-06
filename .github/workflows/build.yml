@@ -51,7 +51,7 @@ jobs:
           new_version_code=$((current_version_code + 1))
           # Përditësoj versionCode, version, dhe zipUrl në update.json
           jq --arg version "${{ env.VERSION }}" \
-             --arg zipUrl "https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip" \
+             --arg zipUrl "https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Boot_Scripts_${{ env.VERSION }}.zip" \
              --argjson versionCode "$new_version_code" \
              '.version = $version | .zipUrl = $zipUrl | .versionCode = $versionCode' \
              update.json > tmp.json && mv tmp.json update.json
@@ -97,7 +97,7 @@ jobs:
       # 8. Krijo skedarin ZIP me emër versioni
       - name: Create zip archive
         run: |
-          ZIP_NAME="Odex_app_${{ env.VERSION }}.zip"
+          ZIP_NAME="Boot_Scripts_${{ env.VERSION }}.zip"
           echo "Creating ZIP: $ZIP_NAME"
           zip -r $ZIP_NAME ./* -x '.git/*' '.github/*'
           echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
@@ -109,7 +109,7 @@ jobs:
           tag_name: v${{ env.VERSION }}
           name: Release v${{ env.VERSION }}
           files: |
-            Odex_app_${{ env.VERSION }}.zip
+            Boot_Scripts_${{ env.VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
