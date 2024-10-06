@@ -24,8 +24,9 @@ if [ -f "$SCRIPT" ]; then
     fi
 
     # Execute the script and check for errors
-    if sh "$SCRIPT"; then
+    if "$SCRIPT"; then
         echo "Script executed successfully"
+       sh  $SCRIPT
     else
         echo "Script execution failed" >&2
         exit 1
