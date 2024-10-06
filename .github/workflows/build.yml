@@ -40,11 +40,22 @@ jobs:
       - name: Display Version
         run: echo "Building version ${{ env.VERSION }}"
 
-      # 4. Përdor sed për të përditësuar versionin në update.json
-      - name: Update version in update.json
+      # 6. Rrit versionCode automatikisht me 1 në update.json dhe përditëso versionin dhe zipUrl
+      - name: Update versionCode, version, and zipUrl in update.json
         run: |
-          sed -i "s@\"version\":.*@\"version\": \"${{ env.VERSION }}\",@" update.json
-          sed -i "s@\"zipUrl\":.*@\"zipUrl\": \"https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\",@" update.json
+          sudo apt-get update
+          sudo apt-get install -y jq
+          # Lexo versionCode aktual nga update.json
+          current_version_code=$(jq -r '.versionCode' update.json)
+          # Rrit versionCode me 1
+          new_version_code=$((current_version_code + 1))
+          # Përditësoj versionCode, version, dhe zipUrl në update.json
+          jq --arg version "${{ env.VERSION }}" \
+             --arg zipUrl "https://github.com/${{ github.repository }}/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip" \
+             --argjson versionCode "$new_version_code" \
+             '.version = $version | .zipUrl = $zipUrl | .versionCode = $versionCode' \
+             update.json > tmp.json && mv tmp.json update.json
+          echo "Updated update.json with versionCode $new_version_code, version ${{ env.VERSION }} and zipUrl"
 
       # 5. Commit dhe push ndryshimet në update.json
       - name: Commit dhe push ndryshimet në update.json
