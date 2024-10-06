@@ -44,7 +44,7 @@ jobs:
       - name: Update version in update.json
         run: |
           sed -i "s@\"version\":.*@\"version\": \"${{ env.VERSION }}\",@" update.json
-          sed -i "s@\"zipUrl\":.*@\"zipUrl\": \"https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip\"@" update.json
+          sed -i "s@\"zipUrl\":.*@\"zipUrl\": \"https://github.com/cocka11/Odex_app/releases/download/v${{ env.VERSION }}/Odex_app_${{ env.VERSION }}.zip,\"@" update.json
 
       # 5. Commit dhe push ndryshimet në update.json
       - name: Commit dhe push ndryshimet në update.json
