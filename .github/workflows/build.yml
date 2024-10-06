@@ -56,6 +56,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+          # 3. Rrit versionCode automatikisht me 1
+      - name: Increment versionCode in module.prop
+        run: |
+          # Lexo versionCode aktual nga module.prop
+          current_version_code=$(grep '^versionCode=' module.prop | cut -d'=' -f2)
+          # Rrit versionCode me 1
+          new_version_code=$((current_version_code + 1))
+          # Përditëso versionCode në module.prop
+          sed -i "s/^versionCode=.*/versionCode=${new_version_code}/" module.prop
+          echo "Updated module.prop with versionCode $new_version_code"
+          echo "VERSION_CODE=${new_version_code}" >> $GITHUB_ENV
+
       # 6. Përdor sed për të përditësuar versionin në module.prop
       - name: Update version in module.prop
         run: |
