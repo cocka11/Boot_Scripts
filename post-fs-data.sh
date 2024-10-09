@@ -4,7 +4,7 @@ MODDIR=${0%/*}
 SCRIPT="$MODDIR/system/bin/boot_script.sh"
 SCRIPT_init="$MODDIR/system/etc/init.d"
 POWER_SAVER="$MODDIR/system/bin/disable_power_save.sh"
-POWER_SAVER="$MODDIR/system/bin/enable_power_save.sh
+POWER_SAVER="$MODDIR/system/bin/enable_power_save.sh"
     chown 0:0 "$POWER_SAVER"
     chmod 755 "$POWER_SAVER"
 
