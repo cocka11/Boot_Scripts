@@ -31,7 +31,7 @@ while true; do
             # Llogarit diferencën e kohës që nga fikja e ekranit
             elapsed_time=$(time_diff_in_seconds $start_time)
             
-            if [ "$elapsed_time" -ge 600 ]; then
+            if [ "$elapsed_time" -ge 300 ]; then
                 sh /system/bin/enable_power_save.sh
                 # Montimi i sistemit si të shkruajtshëm
                 mount -o rw,remount /
