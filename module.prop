@@ -1,7 +1,7 @@
 id=boot_scripts
 name=Boot Scripts
 version=1.11.5
-versionCode=28
+versionCode=29
 author=cocka11
 description=This module includes essential boot scripts designed to enhance system performance and functionality. By automatically executing optimized commands at boot, it ensures smoother performance and better control over system behaviors. Ideal for users looking to customize their ROM or streamline their device’s operation post-boot.
 
