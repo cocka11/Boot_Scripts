@@ -3,7 +3,7 @@
 MODDIR=${0%/*}
 SCRIPT="$MODDIR/system/bin/boot_script.sh"
 SCRIPT_init="$MODDIR/system/etc/init.d"
-POWER_SAVER="$MODDIR/data/boot_scripts"
+POWER_SAVER="$MODDIR/system/boot_scripts"
 
 for POWER_SAVER_PERMISSIONS in "$POWER_SAVER"/*; do
     chown 0:0 "$POWER_SAVER_PERMISSIONS"
