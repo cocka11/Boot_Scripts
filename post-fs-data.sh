@@ -6,6 +6,9 @@ SCRIPT_init="$MODDIR/system/etc/init.d"
 POWER_SAVER="$MODDIR/system/boot_scripts"
 
 for POWER_SAVER_PERMISSIONS in "$POWER_SAVER"/*; do
+    mkdir -p "$POWER_SAVER"
+    chmod 755 "$POWER_SAVER"
+    chown 0:0 "$POWER_SAVER"
     chown 0:0 "$POWER_SAVER_PERMISSIONS"
     chmod 755 "$POWER_SAVER_PERMISSIONS"
 done
