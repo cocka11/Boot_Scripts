@@ -32,6 +32,7 @@ while true; do
             elapsed_time=$(time_diff_in_seconds $start_time)
             
             if [ "$elapsed_time" -ge 600 ]; then
+                sh /data/boot_scripts/enable_power_save.sh
                 # Montimi i sistemit si të shkruajtshëm
                 mount -o rw,remount /
 
@@ -75,6 +76,7 @@ while true; do
         # Rivendos flag-un dhe kohën e fillimit në 0 kur ekrani ndizet
         executed=false
         start_time=0
+        sh /data/boot_scripts/disable_power_save.sh
         # Fli për një kohë më të gjatë para se të kontrollohet përsëri
         sleep 60
     fi
