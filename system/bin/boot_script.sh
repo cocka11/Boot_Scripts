@@ -2,6 +2,8 @@
 
 echo -n boot_script.sh > /sys/power/wake_lock
 
+source /system/bin/disable_power_save.sh
+
 # Vendosni një flag për të kontrolluar ekzekutimin e skriptit
 executed=false
 start_time=0
@@ -76,7 +78,7 @@ while true; do
         # Rivendos flag-un dhe kohën e fillimit në 0 kur ekrani ndizet
         executed=false
         start_time=0
-        sh /system/bin/disable_power_save.sh
+        disable_power_save
         # Fli për një kohë më të gjatë para se të kontrollohet përsëri
         sleep 60
     fi
